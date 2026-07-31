@@ -12,6 +12,12 @@ from autonomy.contracts.planning import (
 from autonomy.contracts.runtime import ComponentState, RuntimeHealth
 from autonomy.contracts.safety import SafetyAction, SafetyDecision
 from autonomy.contracts.sensor import RawSensorPacket, SensorHealth, SynchronizedSensorFrame
+from autonomy.contracts.perception import (
+    TrackedObject,
+    LaneBoundary,
+    SensorDegradationStatus,
+    WorldModelSnapshot,
+)
 
 __all__ = [
     "BehaviorIntent",
@@ -30,4 +36,8 @@ __all__ = [
     "SpeedConstraintSet",
     "SynchronizedSensorFrame",
     "TrajectoryPoint",
+    "TrackedObject",
+    "LaneBoundary",
+    "SensorDegradationStatus",
+    "WorldModelSnapshot",
 ]

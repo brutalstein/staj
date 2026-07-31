@@ -36,6 +36,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return AutonomyApplication(configuration).run()
     except CarlaConnectionError as exc:
+        import traceback
+        traceback.print_exc()
         print(f"[HATA] {exc}")
         return 3
 

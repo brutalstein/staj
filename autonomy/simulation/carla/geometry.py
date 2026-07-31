@@ -94,13 +94,31 @@ class VehicleGeometryAdapter:
     _MIN_WHEELBASE_M = 0.5
     _MAX_CANDIDATE_SCORE = 25.0
 
-    def extract(self, vehicle: Any) -> VehicleGeometry:
+    def extract(
+        self,
+        vehicle: Any,
+        pre_tick_fn: Any = None,
+    ) -> VehicleGeometry:
+        """Ego-aracından geometri çıkarır.
+
+        Args:
+            vehicle: CARLA araç aktörü.
+            pre_tick_fn: Opsiyonel.  Actor transform okunmadan önce çağrılacak
+                callable (örn. ``world.tick``).  CARLA synchronous modda araç
+                spawn edilir edilmez ``get_transform()`` henüz dünya konumunu
+                yansıtmaz; bir tick ile güncellenir.  Test mock'larında bu
+                parametreyi geçmeyerek eski davranış korunur.
+        """
         try:
             bounding_box = vehicle.bounding_box
             extent = bounding_box.extent
             center = bounding_box.location
+            if pre_tick_fn is not None:
+                pre_tick_fn()
             actor_transform = vehicle.get_transform()
             wheels = tuple(vehicle.get_physics_control().wheels)
+        except VehicleGeometryError:
+            raise
         except Exception as exc:
             raise VehicleGeometryError("Araç geometrisi CARLA aktöründen okunamadı.") from exc
 
@@ -128,13 +146,10 @@ class VehicleGeometryAdapter:
             for wheel in wheels[:4]
         )
         scale = self._wheel_position_scale(raw_positions, dimensions[0])
-        scaled_positions = tuple(
-            Vector3(position.x * scale, position.y * scale, position.z * scale)
-            for position in raw_positions
-        )
         wheel_candidate = self._select_wheel_candidate(
             actor_transform,
-            scaled_positions,
+            raw_positions,
+            scale,
             box_center,
             half_extents,
         )
@@ -225,31 +240,49 @@ class VehicleGeometryAdapter:
     def _select_wheel_candidate(
         self,
         actor_transform: Any,
-        scaled_positions: tuple[Vector3, Vector3, Vector3, Vector3],
+        raw_positions: tuple[Vector3, Vector3, Vector3, Vector3],
+        scale: float,
         box_center: Vector3,
         half_extents: Vector3,
     ) -> _WheelCandidate:
+        # Raw positions need to be in metres for the geometry scoring to be
+        # comparable against box_center (which is already in actor-local metres).
+        metres_positions = tuple(
+            Vector3(p.x * scale, p.y * scale, p.z * scale) for p in raw_positions
+        )
+
+        # Candidate A — actor_local
+        # Hypothesis: WheelPhysicsControl.position values are actor-local centimetres.
+        # After scaling to metres they are actor-local metres, directly comparable
+        # with box_center and half_extents.
         candidates = [
             self._build_candidate(
                 "actor_local",
-                scaled_positions,
+                metres_positions,  # type: ignore[arg-type]
                 box_center,
                 half_extents,
             )
         ]
+
+        # Candidate B — world_to_actor
+        # Hypothesis: WheelPhysicsControl.position values are world-space centimetres
+        # (observed in this custom CARLA build).  Steps:
+        #   1. Scale raw cm → world-space metres  (already done → metres_positions)
+        #   2. Apply inverse_transform to convert world metres → actor-local metres.
+        # CARLA's inverse_transform operates in metres, so metres_positions must be
+        # passed — NOT the raw centimetre values.
+        world_transform_error = None
         try:
-            world_to_actor = tuple(
-                self._inverse_transform(actor_transform, position)
-                for position in scaled_positions
+            local_from_world = tuple(
+                self._inverse_transform(actor_transform, p) for p in metres_positions
             )
         except Exception as exc:
             world_transform_error = exc
         else:
-            world_transform_error = None
             candidates.append(
                 self._build_candidate(
                     "world_to_actor",
-                    world_to_actor,  # type: ignore[arg-type]
+                    local_from_world,  # type: ignore[arg-type]
                     box_center,
                     half_extents,
                 )
@@ -313,6 +346,10 @@ class VehicleGeometryAdapter:
 
     @staticmethod
     def _inverse_transform(actor_transform: Any, position: Vector3) -> Vector3:
+        """World-space pozisyonu actor-local frame'e çevirir.
+
+        position değerleri raw (ölçeksiz) olmalıdır; scale bu çağrıdan sonra uygulanır.
+        """
         location_type = type(actor_transform.location)
         point = location_type(x=position.x, y=position.y, z=position.z)
         local = actor_transform.inverse_transform(point)

@@ -107,7 +107,19 @@ class CarlaPhase1Runtime(BaseService):
             self._enable_synchronous_mode()
             self._vehicle = self._spawn_ego_vehicle()
             geometry_adapter = VehicleGeometryAdapter()
-            self._geometry = geometry_adapter.extract(self._vehicle)
+            # CARLA synchronous modda araç spawn edildikten hemen sonra
+            # actor.get_transform() henüz (0,0,0) döndürür — PhysX aktörü
+            # henüz dünya koordinat sistemine yerleştirilmemiştir.
+            # WheelPhysicsControl.position ise zaten doğru world-space
+            # koordinatları içerir.  inverse_transform'un anlamlı sonuç
+            # vermesi için actor transform'un gerçek konumunu yansıtması
+            # gerekir; bu nedenle geometri okumadan hemen önce tek bir
+            # başlatma tick'i atılır.
+            def _init_tick() -> None:
+                self._world.tick(self._configuration.carla.timeout_seconds)
+
+            self._geometry = geometry_adapter.extract(self._vehicle, pre_tick_fn=_init_tick)
+
             LOGGER.info(
                 "Ego geometrisi: wheelbase=%.3f m tracks=(%.3f, %.3f) m "
                 "wheel_reference=%s scale=%.3f",
@@ -375,10 +387,13 @@ class CarlaPhase1Runtime(BaseService):
         self._vehicle = None
         if vehicle is not None:
             try:
-                if getattr(vehicle, "is_alive", True):
-                    vehicle.destroy()
+                vehicle.destroy()
             except Exception as exc:
-                errors.append(f"ego destroy: {exc}")
+                # "already dead" CARLA uyarısını hata olarak kaydetme;
+                # _cleanup_complete bayrağı çift çağrıyı zaten önler.
+                exc_str = str(exc).lower()
+                if "already dead" not in exc_str and "actor" not in exc_str:
+                    errors.append(f"ego destroy: {exc}")
 
         try:
             self._recorder.stop(status=status)

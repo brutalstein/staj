@@ -76,6 +76,16 @@ class FakeVehicle:
         self.control = control
 
     def get_transform(self) -> SimpleNamespace:
+        if not hasattr(self, "_transform_call_count"):
+            self._transform_call_count = 0
+        self._transform_call_count += 1
+        if self._transform_call_count == 1:
+            # CARLA synchronous modda spawn sonrası ilk get_transform() çağrısı
+            # henüz (0,0,0) döndürür.  Gerçek konum bir world.tick() sonrası gelir.
+            return SimpleNamespace(
+                location=vector(0.0, 0.0, 0.0),
+                rotation=SimpleNamespace(roll=0.0, pitch=0.0, yaw=0.0),
+            )
         return SimpleNamespace(
             location=vector(1.0, 2.0, 0.3),
             rotation=SimpleNamespace(roll=0.0, pitch=0.0, yaw=5.0),
@@ -281,10 +291,15 @@ def test_phase1_runtime_spawns_synchronizes_records_and_cleans(tmp_path: Path) -
 
     first = runtime.tick()
     second = runtime.tick()
-    assert first.synchronized is None
-    assert second.synchronized is not None
-    assert second.synchronized.contract.metadata.simulation_frame == 2
-    assert len(second.synchronized.measurements_by_sensor_id) == 16
+    # on_start() içinde bir başlatma tick'i atılır (frame=1).  Bu tick
+    # sırasında sensörler henüz listen() ile kaydedilmemiş olduğundan
+    # callback tetiklenmez.  sync_stride=2 olduğundan:
+    #   frame=2 → synchronization_due (next=None) → first.synchronized alınır
+    #   frame=3 → next_sync=4, frame < 4 → second.synchronized=None
+    assert first.synchronized is not None
+    assert first.synchronized.contract.metadata.simulation_frame == 2
+    assert len(first.synchronized.measurements_by_sensor_id) == 16
+    assert second.synchronized is None
 
     run_directory = runtime.recorder_run_directory
     assert run_directory is not None
@@ -300,6 +315,7 @@ def test_phase1_runtime_spawns_synchronizes_records_and_cleans(tmp_path: Path) -
     assert manifest["frame_count"] == 1
     assert len(manifest["sensors"]) == 16
     assert (run_directory / "frames.jsonl").read_text(encoding="utf-8").count("\n") == 1
+
 
 
 def test_phase1_runtime_rolls_back_partial_sensor_spawn(tmp_path: Path) -> None:
