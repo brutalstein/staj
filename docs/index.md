@@ -1,14 +1,16 @@
 # L4 Autonomy Architecture Portal
 
-Bu portal koddan ayrı bir sunum değildir. Component, contract, algorithm ve source registry kayıtlarının insan tarafından gezilebilir görünümüdür.
+Bu portal koddan ayrı bir sunum değildir. Component, contract ve runtime kayıtlarının insan tarafından gezilebilir görünümüdür.
 
 <div class="hero-grid">
-  <div class="hero-card"><strong>Faz</strong><br>Faz 0 — Platform omurgası</div>
+  <div class="hero-card"><strong>Faz</strong><br>Faz 1 — Sensor & Time Platform</div>
   <div class="hero-card"><strong>CARLA</strong><br>0.9.16 ana / 0.9.15 uyumluluk</div>
-  <div class="hero-card"><strong>ODD</strong><br>Urban nominal, urban adverse, arterial</div>
-  <div class="hero-card"><strong>Araç</strong><br>Tesla Model 3 başlangıç profili</div>
+  <div class="hero-card"><strong>Runtime</strong><br>50 Hz synchronous world</div>
+  <div class="hero-card"><strong>Sensör</strong><br>16 actor, exact-frame sync</div>
 </div>
 
-## Gezinme ilkesi
+## Default çalışma yolu
 
-Mimari tek bir dev diyagramda gösterilmez. Alan → modül → sözleşme → algoritma → parametre ve test seviyesine indikçe detay açılır.
+`Application → CARLA Phase 1 Runtime → Sensor Gateway → Frame Synchronizer → Recorder`
+
+Ego aracı Faz 1 boyunca güvenli sabit fren durumundadır. Localization, world model, planning ve control sonraki fazlara aittir.

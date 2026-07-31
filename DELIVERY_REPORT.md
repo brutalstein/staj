@@ -1,41 +1,45 @@
-# Faz 0 Teslimat Raporu
+# Faz 1 Teslimat Raporu
 
-**Sürüm:** 0.1.0  
+**Sürüm:** 0.2.0
 **Tarih:** 2026-07-31
+**Baz commit:** `3991e145dfe913cba7e6b5ced618b99eb6bd15c3`
 
 ## Uygulanan kapsam
 
-- Tipli veri sözleşmeleri
-- YAML konfigürasyon yükleme ve hash üretimi
-- Component/contract/algorithm/source registry
-- Runtime servis yaşam döngüsü
-- CARLA lazy-import bağlantı ve sürüm kontrol adaptörü
-- Windows/Ubuntu proje başlatıcıları
-- Windows/Ubuntu doküman portalı başlatıcıları
-- MODULE.md zorunluluğu ve doğrulayıcı
-- MkDocs Material portal iskeleti
-- ODD ve sensör layout başlangıç konfigürasyonları
-- Unit ve mock CARLA bağlantı testleri
+1. Runtime araç geometrisi çıkarımı
+2. Tesla Model 3 deterministik actor spawn
+3. Normalize layout → CARLA relative transform çözümü
+4. 16 sensörlü default sensor factory
+5. Tek-owner synchronous world tick
+6. Bounded callback buffer ve dropped-frame sayaçları
+7. Exact simulation-frame synchronizer
+8. Vehicle/actuator feedback
+9. Manifest + JSONL recorder
+10. Kısmi spawn rollback, actor cleanup ve world settings restore
+11. Default application entegrasyonu
+12. Registry ve yaşayan dokümantasyon güncellemesi
 
-## Kontroller
+## Güvenlik sınırı
 
-- `python tools/validate_project.py`: başarılı
-- `python -m compileall -q autonomy tools tests`: başarılı
-- `python -m pytest -q`: 5 test başarılı
+Faz 1 bir sürüş kontrolcüsü içermez. Ego actor autopilot'a verilmez; throttle 0, brake 1 ve hand brake açık tutulur. Radarlar CARLA radar actor'ünün 4D radar proxy kullanımıdır; gerçek imaging-radar sinyal modeli değildir.
 
-## Ortam notu
+## Doğrulama katmanları
 
-Teslimatın zorunlu Python sürümü 3.11'dir. Paket üretim ortamı Python 3.13 olduğu için `project_launcher.py check` sürüm kontrolünde bilinçli olarak hata vermiştir. Bu davranış launcher gereksinimine uygundur; uygulama yanlış Python sürümünde başlatılmaz.
+- Konfigürasyon/topoloji invariant testleri
+- Geometry ve wheel-unit testleri
+- Buffer taşması ve timestamp uyuşmazlığı testleri
+- Lifecycle rollback testi
+- 16 sensörlü mock CARLA end-to-end runtime testi
+- Kısmi sensor-spawn hata enjeksiyonu
+- Recorder manifest/frame kontrolü
+- Opt-in gerçek CARLA spawn/sync/cleanup smoke testi
+- Unit/mock test suite: **26 passed, 1 opt-in CARLA smoke skipped**
+- Python compileall
+- Registry ve MODULE.md doğrulaması
+- Temiz checkout üzerinde `git am` provası
 
-## Sonraki kronolojik faz
+Gerçek CARLA smoke testi donanım/sunucu gerektirdiği için teslimat ortamında otomatik çalıştırılmaz; kullanıcı sisteminde `CARLA_SMOKE_TEST=1` ile çalıştırılır.
 
-Faz 1:
+## Faz 2 giriş koşulu
 
-1. `VehicleGeometryAdapter`
-2. Tesla Model 3 actor spawn
-3. Normalize sensör layoutunun mutlak CARLA transformlarına çevrilmesi
-4. 6 kamera, 64 kanal LiDAR ve 6 radar vekili için Sensor Factory
-5. Tek tick sahibi synchronous orchestrator
-6. Bounded sensor buffer ve frame synchronizer
-7. Recorder manifesti
-8. Spawn/sync/cleanup CARLA smoke testleri
+Faz 2 başlamadan gerçek CARLA smoke testinin başarıyla tamamlanması, manifestte 16 sensor actor kaydı bulunması ve kapanıştan sonra world settings/actor temizliğinin doğrulanması gerekir.

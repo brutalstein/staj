@@ -11,31 +11,34 @@ last_reviewed: "2026-07-31"
 
 ## Amaç
 
-Servislerin başlatma, çalışma, bozulma, hata ve kapanış durumlarını tek bir durum modeliyle yönetir.
+Kaynak sahibi servislerin initialize, start, stop ve hata rollback sırasını deterministik olarak yönetir.
 
-## Inputlar
+## Inputlar ve kaynakları
 
 - Uygulama tarafından kaydedilen `BaseService` örnekleri
+- Servislerin `on_initialize`, `on_start`, `on_stop` implementasyonları
 
 ## İşlem
 
-Servisleri kayıt sırasıyla initialize/start eder; hata veya kapanışta ters sırayla temizler.
+Servisler kayıt sırasıyla initialize/start edilir. Initialize veya start sırasında hata veren servis dahil, kısmen etkinleşmiş bütün servisler ters sırada durdurulur. Normal kapanışta da aynı ters sıra kullanılır.
 
-## Outputlar
+## Outputlar ve tüketiciler
 
-- Servis durumları
-- Kontrollü kapanış sonucu
+- `ComponentState` — application/monitoring
+- Başlatma veya cleanup sonucu — application
 
-## Tüketiciler
+## Hata ve fallback davranışı
 
-- Application
-- Launcher
-- Monitoring
-
-## Algoritma
-
-Deterministik servis yaşam döngüsü ve rollback.
+- Geçersiz state geçişi `LifecycleError` üretir.
+- Rollback sırasında diğer servislerin temizliği devam eder.
+- Cleanup hataları ana exception üzerine not olarak veya toplu `RuntimeError` olarak raporlanır.
 
 ## Testler
 
 - `tests/test_runtime.py`
+- `tests/test_runtime_rollback.py`
+
+## Lineage ve entegrasyon geçmişi
+
+- Faz 0: temel state machine ve orchestrator.
+- Faz 1 / 0.2.0: initialize/start sırasında kısmi kaynak ayıran hatalı servisin de rollback kapsamına alınması.

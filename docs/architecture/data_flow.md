@@ -2,14 +2,15 @@
 
 ```mermaid
 flowchart TD
-  Raw[RawSensorPacket] --> Sync[SynchronizedSensorFrame]
-  Sync --> Loc[LocalizationEstimate]
-  Sync --> World[WorldModelSnapshot]
-  Loc --> World
-  World --> Intent[BehaviorIntent]
-  Intent --> Candidate[TrajectoryCandidateSet]
-  Candidate --> Safe[SafeTrajectory]
-  Safe --> Command[VehicleCommand]
+  Callback[CARLA SensorData] --> Buffer[BoundedSensorBuffer]
+  Buffer --> Sync[SynchronizedMeasurements]
+  Sync --> Contract[SynchronizedSensorFrame]
+  Vehicle[Vehicle Feedback] --> Record[Run Recorder]
+  Sync --> Record
+  Contract --> Loc[Phase 2 LocalizationEstimate]
+  Loc --> World[Phase 3 WorldModelSnapshot]
+  World --> Intent[Phase 4 BehaviorIntent]
+  Intent --> Safe[Phase 5 SafeTrajectory]
 ```
 
-Her mesaj `MessageMetadata` ile timestamp, simulation frame, sequence, coordinate frame, source module ve configuration hash taşır.
+Callback payload'ı gateway içinde kopyalanmadan runtime nesnesi olarak tutulur. `RawSensorPacket` Faz 1'de metadata görünümüdür; gerçek payload sonraki işlem için `SynchronizedMeasurements.measurements_by_sensor_id` içindedir. Her ortak frame configuration hash, CARLA frame ve timestamp ile kaydedilir.

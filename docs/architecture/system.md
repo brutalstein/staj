@@ -2,22 +2,24 @@
 
 ```mermaid
 flowchart LR
-  MM[Mission / ODD] --> SIM[CARLA Platform]
-  SIM --> SYNC[Sensor & Time]
-  SYNC --> LOC[Localization]
-  SYNC --> WM[World Model]
-  LOC --> WM
-  WM --> BEH[Behavior]
-  BEH --> PLAN[Trajectory]
-  PLAN --> SAFE[Safety Cage]
-  SYNC --> SAFE
-  LOC --> SAFE
-  SAFE --> CTRL[Controller]
-  CTRL --> SIM
+  CFG[Configuration] --> APP[Application]
+  APP --> RT[CARLA Phase 1 Runtime]
+  RT --> EGO[Tesla + Geometry]
+  RT --> SF[Sensor Factory]
+  SF --> GW[Sensor Gateway]
+  GW --> SYNC[Frame Synchronizer]
+  RT --> FB[Vehicle Feedback]
+  SYNC --> REC[Recorder]
+  FB --> REC
+  SYNC --> LOC[Phase 2 Localization]
+  LOC --> WM[Phase 3 World Model]
+  WM --> PLAN[Phase 4 Planning]
+  PLAN --> SAFE[Phase 5 Safety/Control]
+  SAFE --> RT
 ```
 
-??? info "Faz 0'da uygulananlar"
-    Configuration, contracts, runtime lifecycle, CARLA bağlantı adaptörü ve launcher.
+??? success "Faz 1'de uygulananlar"
+    Araç geometrisi, Tesla spawn, 16 sensor actor, synchronous tick, bounded buffer, exact-frame sync, vehicle feedback, recorder ve cleanup.
 
 ??? warning "Henüz uygulanmayanlar"
-    Sensör aktörleri, lokalizasyon, world model, planning, safety ve control yalnızca plan/registry seviyesindedir.
+    Localization, world model, behavior/trajectory planning, Safety Cage ve controller.

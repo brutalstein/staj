@@ -17,15 +17,23 @@ class ServiceOrchestrator:
         self.services.append(service)
 
     def start_all(self) -> None:
-        started: list[BaseService] = []
+        activated: list[BaseService] = []
         try:
             for service in self.services:
+                # initialize/on_start kısmi kaynak ayırmış olabilir; hata veren servis de
+                # rollback listesine baştan alınır.
+                activated.append(service)
                 service.initialize()
                 service.start()
-                started.append(service)
-        except Exception:
-            for service in reversed(started):
-                service.stop()
+        except Exception as exc:
+            cleanup_errors: list[str] = []
+            for service in reversed(activated):
+                try:
+                    service.stop()
+                except Exception as cleanup_exc:
+                    cleanup_errors.append(f"{service.component_id}: {cleanup_exc}")
+            if cleanup_errors:
+                exc.add_note("Rollback hataları: " + "; ".join(cleanup_errors))
             raise
 
     def stop_all(self) -> None:
@@ -36,4 +44,7 @@ class ServiceOrchestrator:
             except Exception as exc:  # Bütün servislerin temizlenmesi denenmelidir.
                 errors.append(exc)
         if errors:
-            raise RuntimeError(f"{len(errors)} servis güvenli biçimde kapatılamadı.")
+            details = "; ".join(str(error) for error in errors)
+            raise RuntimeError(
+                f"{len(errors)} servis güvenli biçimde kapatılamadı: {details}"
+            )

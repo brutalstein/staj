@@ -1,9 +1,12 @@
 schema_version: "1.0"
 vehicle_id: "tesla_model3"
 carla_blueprint: "vehicle.tesla.model3"
+role_name: "hero"
 geometry_source: "runtime_vehicle_geometry_adapter"
 reference_frame: "ego_rear_axle"
 manual_dimensions_allowed: false
+hold_brake_on_start: true
 notes:
   - "Boyutlar dokümana elle sabitlenmez."
-  - "Bounding box ve wheel positions CARLA actor blueprint/instance üzerinden çıkarılır."
+  - "Bounding box ve wheel positions CARLA actor instance üzerinden çıkarılır."
+  - "Faz 1 boyunca kontrolcü bulunmadığından ego güvenli sabit fren durumunda tutulur."

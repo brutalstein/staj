@@ -3,21 +3,21 @@ algorithms:
   - algorithm_id: "ALG-SIM-001"
     name: "Deterministik CARLA orkestrasyonu"
     module_id: "carla_adapter"
-    status: "baseline"
+    status: "implemented"
     odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
-    inputs: ["RuntimeConfiguration"]
-    outputs: ["CarlaServerInfo"]
-    fallback: "controlled_shutdown"
+    inputs: ["RuntimeConfiguration", "Phase1Configuration"]
+    outputs: ["CarlaServerInfo", "Phase1TickResult"]
+    fallback: "controlled_shutdown_and_world_restore"
     references: ["CARLA_SYNCHRONY_DOCUMENTATION"]
 
   - algorithm_id: "ALG-SYNC-001"
-    name: "Bounded multi-rate sensor synchronization"
+    name: "Bounded exact-frame multi-rate sensor synchronization"
     module_id: "time_synchronizer"
-    status: "planned_phase_1"
+    status: "implemented"
     odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
-    inputs: ["RawSensorPacket"]
+    inputs: ["SensorMeasurement"]
     outputs: ["SynchronizedSensorFrame"]
-    fallback: "missing_modality_mask"
+    fallback: "bounded_retry_then_fail_fast"
     references: ["CARLA_SYNCHRONY_DOCUMENTATION"]
 
   - algorithm_id: "ALG-LOC-001"

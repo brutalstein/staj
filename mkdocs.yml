@@ -29,11 +29,14 @@ nav:
       - Sistem: architecture/system.md
       - Veri Akışı: architecture/data_flow.md
       - Faz Durumu: architecture/phase_status.md
+  - Runtime:
+      - Faz 1: runtime/phase1.md
   - Algoritmalar: algorithms/index.md
   - Sensör Yerleşimi: sensors/layout.md
   - Kaynaklar: sources/index.md
   - Geliştirici:
       - Modül Kayıtları: development/module_records.md
+      - ADR-0002: decisions/ADR-0002-phase1-synchronous-runtime.md
 
 markdown_extensions:
   - admonition

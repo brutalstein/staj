@@ -63,7 +63,11 @@ class BaseService(ABC):
 
     def start(self) -> None:
         self.transition_to(ComponentState.RUNNING)
-        self.on_start()
+        try:
+            self.on_start()
+        except Exception:
+            self._state = ComponentState.FAILED
+            raise
 
     def stop(self) -> None:
         if self._state in {ComponentState.STOPPED, ComponentState.CREATED}:

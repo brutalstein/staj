@@ -15,3 +15,16 @@ runtime:
   fixed_delta_seconds: 0.02
   control_frequency_hz: 50
   log_level: "INFO"
+
+phase1:
+  vehicle_config: "../vehicles/tesla_model3.yaml"
+  sensor_layout_config: "../sensors/layouts/tesla_model3_omnihd_v1.yaml"
+  spawn_point_index: 0
+  sensor_buffer_capacity: 8
+  synchronization_timeout_seconds: 1.0
+  maximum_consecutive_sync_misses: 5
+  recording:
+    enabled: true
+    output_directory: "../../runtime/recordings"
+    record_raw_data: false
+    flush_every_frames: 25

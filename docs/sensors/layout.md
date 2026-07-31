@@ -1,32 +1,38 @@
 # Sensör Yerleşimi
 
-Başlangıç topolojisi:
+Default topoloji:
 
-- 6 çevresel RGB kamera
-- 1 adet 64 kanal 360° LiDAR
-- 6 adet 4D radar vekili
-- Çift GNSS
-- IMU ve araç geri bildirimi
+- 6 çevresel RGB kamera — 25 Hz, 1280×720
+- 1 adet 64 kanal 360° ray-cast LiDAR — 25 Hz
+- 6 adet CARLA radar tabanlı 4D radar proxy — 25 Hz
+- 2 GNSS — 50 Hz
+- 1 IMU — 50 Hz
+- Araç feedback — her 50 Hz world tick'inde
 
-## Matematiksel tanım
+## Koordinat ve geometri
+
+CARLA actor frame'i x-forward, y-right, z-up olarak kullanılır. Sensör pozları araç boyutuna sabit metre değerleriyle bağlanmaz:
 
 \[
-{}^{E}T_{S_i}=
-\begin{bmatrix}
-R_i&t_i\\
-0&1
-\end{bmatrix}
+x_i=x_{rear\ axle}+r^x_i L_{wheelbase}
 \]
 
 \[
-R_i=R_z(\psi_i)R_y(\theta_i)R_x(\phi_i)
+y_i=y_{bbox}+r^y_i W_{body}
 \]
-
-LiDAR başlangıç konumu:
 
 \[
-t_L=[0.45B,\ 0,\ H+0.10]^T
+z_i=z_{body\ bottom}+r^z_i H_{body}+h_i
 \]
 
-!!! note "3B görünüm"
-    Three.js tabanlı araç ve FoV görünümü Faz 1'de gerçek VehicleGeometryAdapter çıktısıyla bağlanacaktır. Faz 0'da sahte araç geometrisi eklenmemiştir.
+Rotation, layout içindeki roll/pitch/yaw derece değeridir. Çözümlenen transform actor-relative olarak `AttachmentType.Rigid` ile uygulanır.
+
+## Runtime kaynakları
+
+- Araç bounding box: CARLA actor instance
+- Wheelbase/track: ilk dört `WheelPhysicsControl.position`
+- Normalize layout: `config/sensors/layouts/tesla_model3_omnihd_v1.yaml`
+- Gerçek çözülmüş pozlar: her run `manifest.json`
+
+!!! warning "Radar modeli"
+    CARLA `sensor.other.radar`, 4D radar entegrasyon arayüzünü geliştirmek için proxy olarak kullanılır. Gerçek imaging radar elevation/point-cloud fiziği iddia edilmez.

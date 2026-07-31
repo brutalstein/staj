@@ -6,63 +6,103 @@ vehicle_blueprint: "vehicle.tesla.model3"
 sensors:
   - sensor_id: "lidar_roof"
     type: "lidar_64_channel"
-    normalized_position:
-      wheelbase_ratio_x: 0.45
-      vehicle_width_ratio_y: 0.0
-      vehicle_height_ratio_z: 1.0
-      additional_height_m: 0.10
+    normalized_position: {wheelbase_ratio_x: 0.45, vehicle_width_ratio_y: 0.0, vehicle_height_ratio_z: 1.0, additional_height_m: 0.10}
     orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+    attributes:
+      channels: "64"
+      range: "120.0"
+      points_per_second: "1300000"
+      rotation_frequency: "25.0"
+      upper_fov: "10.0"
+      lower_fov: "-30.0"
+      sensor_tick: "0.04"
 
   - sensor_id: "camera_front"
     type: "rgb_camera"
+    normalized_position: {wheelbase_ratio_x: 0.62, vehicle_width_ratio_y: 0.0, vehicle_height_ratio_z: 0.78, additional_height_m: 0.08}
     orientation_deg: {roll: 0.0, pitch: -2.0, yaw: 0.0}
-    horizontal_fov_deg: 80.0
+    attributes: {image_size_x: "1280", image_size_y: "720", fov: "80.0", sensor_tick: "0.04"}
 
   - sensor_id: "camera_front_left"
     type: "rgb_camera"
-    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: 60.0}
-    horizontal_fov_deg: 110.0
+    normalized_position: {wheelbase_ratio_x: 0.50, vehicle_width_ratio_y: -0.18, vehicle_height_ratio_z: 0.82, additional_height_m: 0.05}
+    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: -60.0}
+    attributes: {image_size_x: "1280", image_size_y: "720", fov: "110.0", sensor_tick: "0.04"}
 
   - sensor_id: "camera_front_right"
     type: "rgb_camera"
-    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: -60.0}
-    horizontal_fov_deg: 110.0
+    normalized_position: {wheelbase_ratio_x: 0.50, vehicle_width_ratio_y: 0.18, vehicle_height_ratio_z: 0.82, additional_height_m: 0.05}
+    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: 60.0}
+    attributes: {image_size_x: "1280", image_size_y: "720", fov: "110.0", sensor_tick: "0.04"}
 
   - sensor_id: "camera_rear_left"
     type: "rgb_camera"
-    orientation_deg: {roll: 0.0, pitch: -5.0, yaw: 120.0}
-    horizontal_fov_deg: 110.0
+    normalized_position: {wheelbase_ratio_x: 0.30, vehicle_width_ratio_y: -0.18, vehicle_height_ratio_z: 0.82, additional_height_m: 0.05}
+    orientation_deg: {roll: 0.0, pitch: -5.0, yaw: -120.0}
+    attributes: {image_size_x: "1280", image_size_y: "720", fov: "110.0", sensor_tick: "0.04"}
 
   - sensor_id: "camera_rear_right"
     type: "rgb_camera"
-    orientation_deg: {roll: 0.0, pitch: -5.0, yaw: -120.0}
-    horizontal_fov_deg: 110.0
+    normalized_position: {wheelbase_ratio_x: 0.30, vehicle_width_ratio_y: 0.18, vehicle_height_ratio_z: 0.82, additional_height_m: 0.05}
+    orientation_deg: {roll: 0.0, pitch: -5.0, yaw: 120.0}
+    attributes: {image_size_x: "1280", image_size_y: "720", fov: "110.0", sensor_tick: "0.04"}
 
   - sensor_id: "camera_rear"
     type: "rgb_camera"
+    normalized_position: {wheelbase_ratio_x: 0.20, vehicle_width_ratio_y: 0.0, vehicle_height_ratio_z: 0.78, additional_height_m: 0.08}
     orientation_deg: {roll: 0.0, pitch: -4.0, yaw: 180.0}
-    horizontal_fov_deg: 115.0
+    attributes: {image_size_x: "1280", image_size_y: "720", fov: "115.0", sensor_tick: "0.04"}
 
   - sensor_id: "radar_front"
     type: "4d_radar_proxy"
+    normalized_position: {wheelbase_ratio_x: 1.05, vehicle_width_ratio_y: 0.0, vehicle_height_ratio_z: 0.28}
     orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+    attributes: {horizontal_fov: "80.0", vertical_fov: "20.0", range: "120.0", points_per_second: "6000", sensor_tick: "0.04"}
 
   - sensor_id: "radar_front_left"
     type: "4d_radar_proxy"
-    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 55.0}
+    normalized_position: {wheelbase_ratio_x: 0.95, vehicle_width_ratio_y: -0.38, vehicle_height_ratio_z: 0.32}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: -55.0}
+    attributes: {horizontal_fov: "60.0", vertical_fov: "20.0", range: "100.0", points_per_second: "5000", sensor_tick: "0.04"}
 
   - sensor_id: "radar_front_right"
     type: "4d_radar_proxy"
-    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: -55.0}
+    normalized_position: {wheelbase_ratio_x: 0.95, vehicle_width_ratio_y: 0.38, vehicle_height_ratio_z: 0.32}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 55.0}
+    attributes: {horizontal_fov: "60.0", vertical_fov: "20.0", range: "100.0", points_per_second: "5000", sensor_tick: "0.04"}
 
   - sensor_id: "radar_rear_left"
     type: "4d_radar_proxy"
-    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 145.0}
+    normalized_position: {wheelbase_ratio_x: -0.15, vehicle_width_ratio_y: -0.38, vehicle_height_ratio_z: 0.32}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: -145.0}
+    attributes: {horizontal_fov: "60.0", vertical_fov: "20.0", range: "100.0", points_per_second: "5000", sensor_tick: "0.04"}
 
   - sensor_id: "radar_rear_right"
     type: "4d_radar_proxy"
-    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: -145.0}
+    normalized_position: {wheelbase_ratio_x: -0.15, vehicle_width_ratio_y: 0.38, vehicle_height_ratio_z: 0.32}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 145.0}
+    attributes: {horizontal_fov: "60.0", vertical_fov: "20.0", range: "100.0", points_per_second: "5000", sensor_tick: "0.04"}
 
   - sensor_id: "radar_rear"
     type: "4d_radar_proxy"
+    normalized_position: {wheelbase_ratio_x: -0.20, vehicle_width_ratio_y: 0.0, vehicle_height_ratio_z: 0.28}
     orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 180.0}
+    attributes: {horizontal_fov: "80.0", vertical_fov: "20.0", range: "120.0", points_per_second: "6000", sensor_tick: "0.04"}
+
+  - sensor_id: "gnss_primary"
+    type: "gnss"
+    normalized_position: {wheelbase_ratio_x: 0.45, vehicle_width_ratio_y: -0.12, vehicle_height_ratio_z: 1.0, additional_height_m: 0.15}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+    attributes: {sensor_tick: "0.02"}
+
+  - sensor_id: "gnss_secondary"
+    type: "gnss"
+    normalized_position: {wheelbase_ratio_x: 0.45, vehicle_width_ratio_y: 0.12, vehicle_height_ratio_z: 1.0, additional_height_m: 0.15}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+    attributes: {sensor_tick: "0.02"}
+
+  - sensor_id: "imu_center"
+    type: "imu"
+    normalized_position: {wheelbase_ratio_x: 0.45, vehicle_width_ratio_y: 0.0, vehicle_height_ratio_z: 0.45}
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+    attributes: {sensor_tick: "0.02"}

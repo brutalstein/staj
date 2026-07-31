@@ -38,6 +38,24 @@ class CarlaAdapter:
             raise CarlaConnectionError("CARLA bağlantısı henüz kurulmadı.")
         return self._server_info
 
+    @property
+    def carla_module(self) -> ModuleType:
+        if self._carla_module is None:
+            raise CarlaConnectionError("CARLA bağlantısı henüz kurulmadı.")
+        return self._carla_module
+
+    @property
+    def client(self) -> Any:
+        if self._client is None:
+            raise CarlaConnectionError("CARLA bağlantısı henüz kurulmadı.")
+        return self._client
+
+    @property
+    def world(self) -> Any:
+        if self._world is None:
+            raise CarlaConnectionError("CARLA bağlantısı henüz kurulmadı.")
+        return self._world
+
     def connect(self) -> CarlaServerInfo:
         try:
             self._carla_module = import_module("carla")

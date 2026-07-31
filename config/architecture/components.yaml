@@ -4,41 +4,41 @@ components:
   - module_id: "configuration"
     status: "implemented"
     input_producers: ["external"]
-    output_consumers: ["application", "carla_adapter"]
+    output_consumers: ["application", "carla_adapter", "sensor_gateway", "time_synchronizer", "recorder"]
 
   - module_id: "contracts"
     status: "implemented"
     input_producers: []
-    output_consumers: ["application", "runtime", "carla_adapter"]
+    output_consumers: ["application", "runtime", "carla_adapter", "sensor_gateway", "time_synchronizer", "recorder"]
 
   - module_id: "runtime"
     status: "implemented"
     input_producers: ["application"]
-    output_consumers: ["application"]
+    output_consumers: ["application", "carla_adapter"]
 
   - module_id: "carla_adapter"
     status: "implemented"
-    input_producers: ["configuration", "external"]
-    output_consumers: ["application"]
+    input_producers: ["configuration", "runtime", "external"]
+    output_consumers: ["application", "sensor_gateway", "recorder"]
 
   - module_id: "application"
     status: "implemented"
-    input_producers: ["configuration", "carla_adapter", "runtime"]
-    output_consumers: ["external"]
+    input_producers: ["configuration", "carla_adapter", "runtime", "time_synchronizer"]
+    output_consumers: ["recorder", "external"]
 
   - module_id: "sensor_gateway"
-    status: "planned_phase_1"
+    status: "implemented"
     input_producers: ["carla_adapter"]
     output_consumers: ["time_synchronizer", "recorder"]
 
   - module_id: "time_synchronizer"
-    status: "planned_phase_1"
+    status: "implemented"
     input_producers: ["sensor_gateway"]
-    output_consumers: ["localization", "world_model", "safety_cage"]
+    output_consumers: ["recorder", "localization", "world_model", "safety_cage"]
 
   - module_id: "recorder"
-    status: "planned_phase_1"
-    input_producers: ["sensor_gateway", "time_synchronizer", "application"]
+    status: "implemented"
+    input_producers: ["sensor_gateway", "time_synchronizer", "application", "carla_adapter"]
     output_consumers: ["external"]
 
   - module_id: "localization"
