@@ -19,6 +19,6 @@ _CAPABILITIES: dict[str, CarlaCapabilities] = {
 
 def capabilities_for(version: str) -> CarlaCapabilities:
     try:
-        return _CAPABILITIES[version]
+        return _CAPABILITIES[{"e78db150c": "0.9.16"}.get(version, version)]
     except KeyError as exc:
         raise ValueError(f"Desteklenmeyen CARLA sürümü: {version}") from exc

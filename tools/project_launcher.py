@@ -104,7 +104,20 @@ def run_install(include_docs: bool) -> int:
         )
         return EXIT_ENVIRONMENT
     extras = ".[dev,docs]" if include_docs else ".[dev]"
-    return subprocess.call([sys.executable, "-m", "pip", "install", "-e", extras], cwd=PROJECT_ROOT)
+    process = subprocess.Popen([sys.executable, "-m", "pip", "install", "-e", extras], cwd=PROJECT_ROOT)
+    try:
+        return process.wait()
+    except KeyboardInterrupt:
+        # Alt uygulama SIGINT sinyalini kendisi işleyip güvenli biçimde kapanır.
+        try:
+            return process.wait(timeout=5.0)
+        except subprocess.TimeoutExpired:
+            process.terminate()
+            try:
+                return process.wait(timeout=5.0)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                return process.wait()
 
 
 def build_parser() -> argparse.ArgumentParser:
