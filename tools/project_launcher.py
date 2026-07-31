@@ -13,9 +13,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from autonomy.configuration.loader import ConfigurationError, load_configuration
-from autonomy.simulation.carla.adapter import CarlaAdapter, CarlaConnectionError
-
 
 EXIT_OK = 0
 EXIT_ENVIRONMENT = 10
@@ -57,21 +54,27 @@ def run_check(config_path: Path, require_carla: bool) -> int:
     if missing:
         errors.append(f"Eksik Python modülleri: {', '.join(missing)}")
 
+    # Konfigürasyon yükleyicisi PyYAML kullanır. Önce ortamı doğrulayarak
+    # install/check komutlarının eksik bağımlılıkta traceback üretmesini önleriz.
+    if errors:
+        _print_errors("Ortam kontrolleri başarısız.", errors)
+        return EXIT_ENVIRONMENT
+
+    from autonomy.configuration.loader import ConfigurationError, load_configuration
+
     try:
         configuration = load_configuration(config_path)
     except ConfigurationError as exc:
         _print_errors("Konfigürasyon doğrulanamadı.", [str(exc)])
         return EXIT_CONFIGURATION
 
-    if errors:
-        _print_errors("Ortam kontrolleri başarısız.", errors)
-        return EXIT_ENVIRONMENT
-
     print(f"[OK] Python: {platform.python_version()}")
     print(f"[OK] Sanal ortam: {sys.prefix}")
     print(f"[OK] Konfigürasyon: {configuration.configuration_hash[:12]}")
 
     if require_carla:
+        from autonomy.simulation.carla.adapter import CarlaAdapter, CarlaConnectionError
+
         adapter = CarlaAdapter(configuration.carla)
         try:
             info = adapter.connect()
@@ -104,11 +107,21 @@ def run_install(include_docs: bool) -> int:
         )
         return EXIT_ENVIRONMENT
     extras = ".[dev,docs]" if include_docs else ".[dev]"
-    process = subprocess.Popen([sys.executable, "-m", "pip", "install", "-e", extras], cwd=PROJECT_ROOT)
+    return subprocess.call(
+        [sys.executable, "-m", "pip", "install", "-e", extras],
+        cwd=PROJECT_ROOT,
+    )
+
+
+def _wait_for_application_shutdown(process: subprocess.Popen[bytes]) -> int:
+    """Alt uygulamanın SIGINT sonrasında kontrollü kapanmasını bekler."""
+
     try:
         return process.wait()
     except KeyboardInterrupt:
-        # Alt uygulama SIGINT sinyalini kendisi işleyip güvenli biçimde kapanır.
+        # Terminal SIGINT sinyalini hem launcher'a hem alt uygulamaya iletir.
+        # Alt uygulama kendi signal handler'ı ile kapanırken launcher traceback
+        # üretmeden kısa bir süre bekler; takılırsa aşamalı olarak sonlandırır.
         try:
             return process.wait(timeout=5.0)
         except subprocess.TimeoutExpired:
@@ -120,11 +133,32 @@ def run_install(include_docs: bool) -> int:
                 return process.wait()
 
 
+def run_application(config_path: Path) -> int:
+    process = subprocess.Popen(
+        [sys.executable, "-m", "autonomy.application.cli", "--config", str(config_path)],
+        cwd=PROJECT_ROOT,
+    )
+    return _wait_for_application_shutdown(process)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="L4 Autonomy kontrollü proje başlatıcısı")
-    parser.add_argument("command", choices=["start", "check", "doctor", "install"], nargs="?", default="start")
-    parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "config/runtime/default.yaml")
-    parser.add_argument("--with-docs", action="store_true", help="install komutunda docs bağımlılıklarını da kur")
+    parser.add_argument(
+        "command",
+        choices=["start", "check", "doctor", "install"],
+        nargs="?",
+        default="start",
+    )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=PROJECT_ROOT / "config/runtime/default.yaml",
+    )
+    parser.add_argument(
+        "--with-docs",
+        action="store_true",
+        help="install komutunda docs bağımlılıklarını da kur",
+    )
     return parser
 
 
@@ -138,10 +172,7 @@ def main(argv: list[str] | None = None) -> int:
     check_code = run_check(args.config, require_carla=True)
     if check_code != EXIT_OK:
         return check_code
-    return subprocess.call(
-        [sys.executable, "-m", "autonomy.application.cli", "--config", str(args.config)],
-        cwd=PROJECT_ROOT,
-    )
+    return run_application(args.config)
 
 
 if __name__ == "__main__":
