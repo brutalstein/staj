@@ -41,7 +41,14 @@ def validate_algorithms(errors: list[str]) -> None:
     document = load_yaml(path)
     algorithms = document.get("algorithms", [])
     source_document = load_yaml(PROJECT_ROOT / "config/sources/sources.yaml")
-    known_references = {item.get("reference_id") for item in source_document.get("sources", [])}
+    sources = source_document.get("sources", [])
+    source_ids = [item.get("reference_id") for item in sources]
+    duplicate_sources = sorted(
+        {item for item in source_ids if item and source_ids.count(item) > 1}
+    )
+    if duplicate_sources:
+        errors.append(f"Tekrarlanan reference_id: {', '.join(duplicate_sources)}")
+    known_references = set(source_ids)
     ids = [item.get("algorithm_id") for item in algorithms]
     duplicates = sorted({item for item in ids if ids.count(item) > 1})
     if duplicates:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from math import isfinite
+from math import isfinite, sqrt
 from typing import Any
 
 from autonomy.configuration.loader import SensorDefinition
@@ -38,6 +38,8 @@ class VehicleGeometry:
     front_track_width_m: float
     rear_track_width_m: float
     wheel_positions_m: tuple[Vector3, Vector3, Vector3, Vector3]
+    wheel_position_reference: str
+    wheel_position_scale: float
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -53,6 +55,8 @@ class VehicleGeometry:
             "front_track_width_m": self.front_track_width_m,
             "rear_track_width_m": self.rear_track_width_m,
             "wheel_positions_m": [position.as_dict() for position in self.wheel_positions_m],
+            "wheel_position_reference": self.wheel_position_reference,
+            "wheel_position_scale": self.wheel_position_scale,
         }
 
 
@@ -76,17 +80,26 @@ class ResolvedSensorPose:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class _WheelCandidate:
+    reference: str
+    ordered_positions: tuple[Vector3, Vector3, Vector3, Vector3]
+    score: float
+
+
 class VehicleGeometryAdapter:
     """CARLA bounding box ve teker konumlarını ego-rear-axle geometrisine dönüştürür."""
 
     _MIN_DIMENSION_M = 0.1
     _MIN_WHEELBASE_M = 0.5
+    _MAX_CANDIDATE_SCORE = 25.0
 
     def extract(self, vehicle: Any) -> VehicleGeometry:
         try:
             bounding_box = vehicle.bounding_box
             extent = bounding_box.extent
             center = bounding_box.location
+            actor_transform = vehicle.get_transform()
             wheels = tuple(vehicle.get_physics_control().wheels)
         except Exception as exc:
             raise VehicleGeometryError("Araç geometrisi CARLA aktöründen okunamadı.") from exc
@@ -115,17 +128,25 @@ class VehicleGeometryAdapter:
             for wheel in wheels[:4]
         )
         scale = self._wheel_position_scale(raw_positions, dimensions[0])
-        wheel_positions = tuple(
+        scaled_positions = tuple(
             Vector3(position.x * scale, position.y * scale, position.z * scale)
             for position in raw_positions
         )
+        wheel_candidate = self._select_wheel_candidate(
+            actor_transform,
+            scaled_positions,
+            box_center,
+            half_extents,
+        )
+        wheel_positions = wheel_candidate.ordered_positions
         front_axle = self._average(wheel_positions[0], wheel_positions[1])
         rear_axle = self._average(wheel_positions[2], wheel_positions[3])
         wheelbase = front_axle.x - rear_axle.x
         if not isfinite(wheelbase) or wheelbase < self._MIN_WHEELBASE_M:
             raise VehicleGeometryError(
-                "CARLA teker sırası/ölçeği beklenen ego x-forward geometrisiyle uyuşmuyor: "
-                f"front_x={front_axle.x:.3f}, rear_x={rear_axle.x:.3f}."
+                "CARLA teker geometrisi beklenen ego x-forward düzeniyle uyuşmuyor: "
+                f"front_x={front_axle.x:.3f}, rear_x={rear_axle.x:.3f}, "
+                f"reference={wheel_candidate.reference}."
             )
 
         front_track = abs(wheel_positions[0].y - wheel_positions[1].y)
@@ -147,7 +168,9 @@ class VehicleGeometryAdapter:
             wheelbase_m=wheelbase,
             front_track_width_m=front_track,
             rear_track_width_m=rear_track,
-            wheel_positions_m=wheel_positions,  # type: ignore[arg-type]
+            wheel_positions_m=wheel_positions,
+            wheel_position_reference=wheel_candidate.reference,
+            wheel_position_scale=scale,
         )
 
     def resolve_sensor_pose(
@@ -175,18 +198,125 @@ class VehicleGeometryAdapter:
         min_x = geometry.bounding_box_center_m.x - geometry.half_extents_m.x
         max_x = geometry.bounding_box_center_m.x + geometry.half_extents_m.x
         if not min_x - longitudinal_margin <= location.x <= max_x + longitudinal_margin:
-            raise VehicleGeometryError(f"{sensor.sensor_id}: x konumu araç zarfının dışında.")
+            raise VehicleGeometryError(
+                f"{sensor.sensor_id}: x={location.x:.3f} m araç zarfının dışında; "
+                f"izin verilen=[{min_x - longitudinal_margin:.3f}, "
+                f"{max_x + longitudinal_margin:.3f}], "
+                f"rear_axle={geometry.rear_axle_center_m.x:.3f}, "
+                f"wheelbase={geometry.wheelbase_m:.3f}, "
+                f"wheel_reference={geometry.wheel_position_reference}."
+            )
         if abs(location.y - geometry.bounding_box_center_m.y) > (
             geometry.half_extents_m.y + lateral_margin
         ):
-            raise VehicleGeometryError(f"{sensor.sensor_id}: y konumu araç zarfının dışında.")
+            raise VehicleGeometryError(
+                f"{sensor.sensor_id}: y={location.y:.3f} m araç zarfının dışında."
+            )
         if not geometry.body_bottom_z_m - 0.2 <= location.z <= (
             geometry.body_bottom_z_m + geometry.body_height_m + vertical_margin
         ):
-            raise VehicleGeometryError(f"{sensor.sensor_id}: z konumu araç zarfının dışında.")
+            raise VehicleGeometryError(
+                f"{sensor.sensor_id}: z={location.z:.3f} m araç zarfının dışında."
+            )
 
         roll, pitch, yaw = sensor.orientation_rpy_deg
         return ResolvedSensorPose(sensor.sensor_id, location, roll, pitch, yaw)
+
+    def _select_wheel_candidate(
+        self,
+        actor_transform: Any,
+        scaled_positions: tuple[Vector3, Vector3, Vector3, Vector3],
+        box_center: Vector3,
+        half_extents: Vector3,
+    ) -> _WheelCandidate:
+        candidates = [
+            self._build_candidate(
+                "actor_local",
+                scaled_positions,
+                box_center,
+                half_extents,
+            )
+        ]
+        try:
+            world_to_actor = tuple(
+                self._inverse_transform(actor_transform, position)
+                for position in scaled_positions
+            )
+        except Exception as exc:
+            world_transform_error = exc
+        else:
+            world_transform_error = None
+            candidates.append(
+                self._build_candidate(
+                    "world_to_actor",
+                    world_to_actor,  # type: ignore[arg-type]
+                    box_center,
+                    half_extents,
+                )
+            )
+
+        best = min(candidates, key=lambda candidate: candidate.score)
+        if best.score > self._MAX_CANDIDATE_SCORE:
+            details = ", ".join(
+                f"{candidate.reference}={candidate.score:.2f}" for candidate in candidates
+            )
+            if world_transform_error is not None:
+                details += f", inverse_transform_error={world_transform_error}"
+            raise VehicleGeometryError(
+                "CARLA teker koordinat referansı güvenilir biçimde çözülemedi: " + details
+            )
+        return best
+
+    def _build_candidate(
+        self,
+        reference: str,
+        positions: tuple[Vector3, Vector3, Vector3, Vector3],
+        box_center: Vector3,
+        half_extents: Vector3,
+    ) -> _WheelCandidate:
+        sorted_by_x = sorted(positions, key=lambda position: position.x, reverse=True)
+        front_pair = sorted(sorted_by_x[:2], key=lambda position: position.y)
+        rear_pair = sorted(sorted_by_x[2:], key=lambda position: position.y)
+        ordered = (front_pair[0], front_pair[1], rear_pair[0], rear_pair[1])
+        front_axle = self._average(ordered[0], ordered[1])
+        rear_axle = self._average(ordered[2], ordered[3])
+        wheelbase = front_axle.x - rear_axle.x
+        front_track = abs(ordered[0].y - ordered[1].y)
+        rear_track = abs(ordered[2].y - ordered[3].y)
+
+        score = 0.0
+        score += abs(ordered[0].x - ordered[1].x) * 10.0
+        score += abs(ordered[2].x - ordered[3].x) * 10.0
+        score += abs(front_axle.y - box_center.y) * 2.0
+        score += abs(rear_axle.y - box_center.y) * 2.0
+        score += self._outside_penalty(front_axle.x, box_center.x, half_extents.x, 0.8)
+        score += self._outside_penalty(rear_axle.x, box_center.x, half_extents.x, 0.8)
+        score += self._outside_penalty(front_axle.y, box_center.y, half_extents.y, 0.5)
+        score += self._outside_penalty(rear_axle.y, box_center.y, half_extents.y, 0.5)
+        body_length = 2.0 * half_extents.x
+        body_width = 2.0 * half_extents.y
+        wheelbase_ratio = wheelbase / body_length
+        front_track_ratio = front_track / body_width
+        rear_track_ratio = rear_track / body_width
+        if not 0.40 <= wheelbase_ratio <= 0.90:
+            score += 100.0
+        if not 0.50 <= front_track_ratio <= 1.20:
+            score += 100.0
+        if not 0.50 <= rear_track_ratio <= 1.20:
+            score += 100.0
+        return _WheelCandidate(reference, ordered, score)
+
+    @staticmethod
+    def _outside_penalty(value: float, center: float, half_extent: float, margin: float) -> float:
+        distance = abs(value - center) - (half_extent + margin)
+        return max(0.0, distance) * 20.0
+
+    @staticmethod
+    def _inverse_transform(actor_transform: Any, position: Vector3) -> Vector3:
+        location_type = type(actor_transform.location)
+        point = location_type(x=position.x, y=position.y, z=position.z)
+        local = actor_transform.inverse_transform(point)
+        return Vector3(float(local.x), float(local.y), float(local.z))
 
     @staticmethod
     def _average(first: Vector3, second: Vector3) -> Vector3:
@@ -201,12 +331,19 @@ class VehicleGeometryAdapter:
         wheel_positions: tuple[Vector3, Vector3, Vector3, Vector3],
         body_length_m: float,
     ) -> float:
-        front_x = (wheel_positions[0].x + wheel_positions[1].x) / 2.0
-        rear_x = (wheel_positions[2].x + wheel_positions[3].x) / 2.0
-        raw_wheelbase = abs(front_x - rear_x)
-        # CARLA/PhysX wheel positions are commonly exposed in centimetres while
-        # actor transforms and bounding boxes use metres. The ratio check keeps
-        # compatibility with builds that already expose metre values.
-        if raw_wheelbase > max(20.0, body_length_m * 4.0):
+        maximum_separation = max(
+            sqrt(
+                (first.x - second.x) ** 2
+                + (first.y - second.y) ** 2
+                + (first.z - second.z) ** 2
+            )
+            for index, first in enumerate(wheel_positions)
+            for second in wheel_positions[index + 1 :]
+        )
+        # WheelPhysicsControl.position has historically been exposed in centimetres
+        # in CARLA/PhysX builds, while actor transforms and bounding boxes use metres.
+        # Pairwise separation is translation/rotation invariant and therefore works
+        # for both world-space and actor-local wheel coordinates.
+        if maximum_separation > max(20.0, body_length_m * 4.0):
             return 0.01
         return 1.0

@@ -1,5 +1,13 @@
 # Değişiklik Günlüğü
 
+## 0.2.1 — 2026-07-31
+
+- CARLA world-space/santimetre wheel position değerleri actor-local metre frame'ine normalize edildi.
+- Wheel sırası varsayımı kaldırıldı ve geometri adayları bounding box/wheelbase/track ile doğrulandı.
+- Faz 1 cleanup idempotent hâle getirildi.
+- Sensör seçimi, yerleşim kararları, dual-GNSS amacı ve CARLA model sınırları kaynaklarıyla belgelendi.
+- Kaynak registry duplicate doğrulaması eklendi.
+
 ## 0.2.0 — 2026-07-31
 
 - Faz 1 default CARLA runtime uygulandı.

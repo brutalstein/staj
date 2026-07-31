@@ -51,6 +51,7 @@ class CarlaPhase1Runtime(BaseService):
         self._next_synchronization_frame: int | None = None
         self._consecutive_sync_misses = 0
         self._shutdown_status = "COMPLETED"
+        self._cleanup_complete = True
 
     @property
     def vehicle(self) -> Any:
@@ -74,6 +75,7 @@ class CarlaPhase1Runtime(BaseService):
 
     def on_initialize(self) -> None:
         self._shutdown_status = "COMPLETED"
+        self._cleanup_complete = False
         self._world = self._adapter.world
         self._carla = self._adapter.carla_module
         required = tuple(
@@ -106,6 +108,15 @@ class CarlaPhase1Runtime(BaseService):
             self._vehicle = self._spawn_ego_vehicle()
             geometry_adapter = VehicleGeometryAdapter()
             self._geometry = geometry_adapter.extract(self._vehicle)
+            LOGGER.info(
+                "Ego geometrisi: wheelbase=%.3f m tracks=(%.3f, %.3f) m "
+                "wheel_reference=%s scale=%.3f",
+                self._geometry.wheelbase_m,
+                self._geometry.front_track_width_m,
+                self._geometry.rear_track_width_m,
+                self._geometry.wheel_position_reference,
+                self._geometry.wheel_position_scale,
+            )
             self._sensor_factory = CarlaSensorFactory(
                 self._carla,
                 self._world,
@@ -346,21 +357,28 @@ class CarlaPhase1Runtime(BaseService):
         }
 
     def _cleanup(self, status: str, raise_on_error: bool) -> None:
+        if self._cleanup_complete:
+            return
+        self._cleanup_complete = True
         errors: list[str] = []
-        if self._sensor_factory is not None and self._spawned_sensors:
-            errors.extend(self._sensor_factory.destroy_all(self._spawned_sensors))
+
+        sensor_factory = self._sensor_factory
+        spawned_sensors = self._spawned_sensors
+        self._sensor_factory = None
         self._spawned_sensors = ()
+        if sensor_factory is not None and spawned_sensors:
+            errors.extend(sensor_factory.destroy_all(spawned_sensors))
         if self._gateway is not None:
             self._gateway.clear()
 
-        if self._vehicle is not None:
+        vehicle = self._vehicle
+        self._vehicle = None
+        if vehicle is not None:
             try:
-                if getattr(self._vehicle, "is_alive", True):
-                    self._vehicle.destroy()
+                if getattr(vehicle, "is_alive", True):
+                    vehicle.destroy()
             except Exception as exc:
                 errors.append(f"ego destroy: {exc}")
-            finally:
-                self._vehicle = None
 
         try:
             self._recorder.stop(status=status)

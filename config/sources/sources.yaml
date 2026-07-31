@@ -6,6 +6,7 @@ sources:
     venue: "CVPR"
     status: "CORE"
     used_by: ["world_model", "trajectory_planner"]
+    url: "https://openaccess.thecvf.com/content/CVPR2023/html/Hu_Planning-Oriented_Autonomous_Driving_CVPR_2023_paper.html"
 
   - reference_id: "BEVFUSION_2023"
     title: "BEVFusion: Multi-Task Multi-Sensor Fusion with Unified Bird's-Eye View Representation"
@@ -13,6 +14,7 @@ sources:
     venue: "ICRA"
     status: "CORE"
     used_by: ["world_model"]
+    url: "https://arxiv.org/abs/2205.13542"
 
   - reference_id: "RCBEVDET_2024"
     title: "RCBEVDet: Radar-Camera Fusion in Bird's Eye View for 3D Object Detection"
@@ -20,6 +22,7 @@ sources:
     venue: "CVPR"
     status: "CORE"
     used_by: ["world_model"]
+    url: "https://openaccess.thecvf.com/content/CVPR2024/html/Lin_RCBEVDet_Radar-camera_Fusion_in_Birds_Eye_View_for_3D_Object_CVPR_2024_paper.html"
 
   - reference_id: "FAST_LIO2_2022"
     title: "FAST-LIO2: Fast Direct LiDAR-Inertial Odometry"
@@ -27,6 +30,7 @@ sources:
     venue: "IEEE Transactions on Robotics"
     status: "CORE"
     used_by: ["localization"]
+    url: "https://arxiv.org/abs/2107.06829"
 
   - reference_id: "FAST_LIVO2_2024"
     title: "FAST-LIVO2: Fast, Direct LiDAR-Inertial-Visual Odometry"
@@ -34,6 +38,7 @@ sources:
     venue: "arXiv"
     status: "SUPPORTING"
     used_by: ["localization"]
+    url: "https://arxiv.org/abs/2408.14035"
 
   - reference_id: "RISAM_2022"
     title: "Robust Incremental Smoothing and Mapping"
@@ -104,11 +109,44 @@ sources:
     venue: "Primary documentation and publications"
     status: "CORE"
     used_by: ["controller"]
-
-  - reference_id: "RTI_NMPC_ACADOS"
-    title: "acados and SQP-RTI real-time optimal control documentation and publications"
-    year: 2026
-    venue: "Official project documentation / primary publications"
-    status: "CORE"
-    used_by: ["controller"]
     url: "https://docs.acados.org/"
+
+  - reference_id: "NUSCENES_2020"
+    title: "nuScenes: A Multimodal Dataset for Autonomous Driving"
+    year: 2020
+    venue: "CVPR"
+    status: "CORE"
+    used_by: ["sensor_gateway", "world_model"]
+    url: "https://openaccess.thecvf.com/content_CVPR_2020/html/Caesar_nuScenes_A_Multimodal_Dataset_for_Autonomous_Driving_CVPR_2020_paper.html"
+
+  - reference_id: "DUAL_GNSS_INS_2024"
+    title: "Improving Vehicle Heading Angle Accuracy Based on Dual-Antenna GNSS/INS/Barometer Integration Using Adaptive Kalman Filter"
+    year: 2024
+    venue: "Sensors"
+    status: "SUPPORTING"
+    used_by: ["sensor_gateway", "localization"]
+    url: "https://doi.org/10.3390/s24031034"
+
+  - reference_id: "CARLA_SENSOR_REFERENCE_0916"
+    title: "CARLA 0.9.16 Sensors Reference"
+    year: 2026
+    venue: "Official documentation"
+    status: "CORE"
+    used_by: ["carla_adapter", "sensor_gateway"]
+    url: "https://carla.readthedocs.io/en/0.9.16/ref_sensors/"
+
+  - reference_id: "CARLA_COORDINATES_DOCUMENTATION"
+    title: "CARLA Coordinates and Transformations"
+    year: 2026
+    venue: "Official documentation"
+    status: "CORE"
+    used_by: ["carla_adapter", "sensor_gateway"]
+    url: "https://carla.readthedocs.io/en/latest/coordinates/"
+
+  - reference_id: "CARLA_WHEEL_POSITION_API_NOTE"
+    title: "CARLA WheelPhysicsControl position reference and unit ambiguity"
+    year: 2020
+    venue: "CARLA issue tracker"
+    status: "SUPPORTING"
+    used_by: ["carla_adapter"]
+    url: "https://github.com/carla-simulator/carla/issues/3221"

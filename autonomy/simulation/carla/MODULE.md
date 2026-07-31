@@ -68,3 +68,7 @@ Araç ve sensör değerleri yalnızca YAML konfigürasyonundan gelir. Boyutlar r
 
 - Faz 0: lazy import, RPC ve sürüm doğrulama.
 - Faz 1 / 0.2.0: default ego/sensor/sync/recorder runtime.
+
+## Wheel geometry compatibility
+
+`WheelPhysicsControl.position` değeri build'e göre actor-local/world ve metre/santimetre varyantı gösterebildiği için doğrudan kullanılmaz. Tekerler arası mesafe ile ölçek belirlenir; world adayı actor transformunun `inverse_transform` işlemiyle local frame'e çevrilir; bounding box/wheelbase/track tutarlılığı en yüksek aday seçilir.

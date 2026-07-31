@@ -45,6 +45,7 @@ class FakeVehicle:
         self.id = actor_id
         self.is_alive = True
         self.autopilot = None
+        self.destroy_calls = 0
         self.control = SimpleNamespace(
             throttle=0.0,
             steer=0.0,
@@ -96,6 +97,7 @@ class FakeVehicle:
         return 0.0
 
     def destroy(self) -> bool:
+        self.destroy_calls += 1
         self.is_alive = False
         return True
 
@@ -315,6 +317,11 @@ def test_phase1_runtime_rolls_back_partial_sensor_spawn(tmp_path: Path) -> None:
     assert world.vehicle is not None and world.vehicle.is_alive is False
     assert len(world.sensors) == 3
     assert all(sensor.is_alive is False for sensor in world.sensors)
+    assert world.vehicle.destroy_calls == 1
+
+    # Orchestrator rollback calls stop after start failure. Cleanup must be idempotent.
+    runtime.stop()
+    assert world.vehicle.destroy_calls == 1
 
 
 def test_phase1_runtime_marks_recorder_failed_after_sync_loss(tmp_path: Path) -> None:

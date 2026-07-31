@@ -40,6 +40,15 @@ Faz 1 bir sürüş kontrolcüsü içermez. Ego actor autopilot'a verilmez; throt
 
 Gerçek CARLA smoke testi donanım/sunucu gerektirdiği için teslimat ortamında otomatik çalıştırılmaz; kullanıcı sisteminde `CARLA_SMOKE_TEST=1` ile çalıştırılır.
 
+## 0.2.1 geometri ve izlenebilirlik düzeltmesi
+
+- `WheelPhysicsControl.position` artık doğrudan actor-local kabul edilmez.
+- World/local ve metre/santimetre adayları araç bounding box, wheelbase ve track tutarlılığıyla çözülür.
+- Teker listesi sırasına bağımlılık kaldırılmıştır.
+- Cleanup tekrar çağrıldığında actor ikinci kez destroy edilmez.
+- Sensör modalitesi, sayısı, yerleşimi ve simülatör sınırlamaları kaynak-köken matrisiyle belgelenmiştir.
+- Gerçek CARLA smoke testi Faz 2 öncesi zorunlu giriş koşulu olmaya devam eder.
+
 ## Faz 2 giriş koşulu
 
 Faz 2 başlamadan gerçek CARLA smoke testinin başarıyla tamamlanması, manifestte 16 sensor actor kaydı bulunması ve kapanıştan sonra world settings/actor temizliğinin doğrulanması gerekir.
