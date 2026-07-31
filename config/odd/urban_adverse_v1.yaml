@@ -1,0 +1,8 @@
+schema_version: "1.0"
+odd_id: "urban_adverse_v1"
+inherits: "urban_nominal_v1"
+maximum_speed_kph: 35
+minimum_visibility_m: 50
+weather: ["heavy_rain", "fog", "low_sun", "night_rain"]
+requires_map: true
+requires_degraded_mode: true

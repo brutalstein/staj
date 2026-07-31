@@ -1,0 +1,26 @@
+schema_version: "1.0"
+contracts:
+  - name: "RawSensorPacket"
+    producer: "sensor_gateway"
+    consumers: ["time_synchronizer", "recorder"]
+    coordinate_frame: "sensor-specific"
+  - name: "SynchronizedSensorFrame"
+    producer: "time_synchronizer"
+    consumers: ["localization", "world_model", "safety_cage"]
+    coordinate_frame: "mixed-with-explicit-metadata"
+  - name: "LocalizationEstimate"
+    producer: "localization"
+    consumers: ["world_model", "behavior_planner", "trajectory_planner", "safety_cage", "controller"]
+    coordinate_frame: "map"
+  - name: "SpeedConstraintSet"
+    producer: "behavior_planner"
+    consumers: ["trajectory_planner"]
+    coordinate_frame: "route-relative"
+  - name: "BehaviorIntent"
+    producer: "behavior_planner"
+    consumers: ["trajectory_planner", "safety_cage"]
+    coordinate_frame: "route-relative"
+  - name: "SafeTrajectory"
+    producer: "safety_cage"
+    consumers: ["controller"]
+    coordinate_frame: "ego_rear_axle"

@@ -1,0 +1,9 @@
+schema_version: "1.0"
+vehicle_id: "tesla_model3"
+carla_blueprint: "vehicle.tesla.model3"
+geometry_source: "runtime_vehicle_geometry_adapter"
+reference_frame: "ego_rear_axle"
+manual_dimensions_allowed: false
+notes:
+  - "Boyutlar dokümana elle sabitlenmez."
+  - "Bounding box ve wheel positions CARLA actor blueprint/instance üzerinden çıkarılır."

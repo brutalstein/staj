@@ -1,0 +1,114 @@
+schema_version: "1.0"
+sources:
+  - reference_id: "UNIAD_2023"
+    title: "Planning-Oriented Autonomous Driving"
+    year: 2023
+    venue: "CVPR"
+    status: "CORE"
+    used_by: ["world_model", "trajectory_planner"]
+
+  - reference_id: "BEVFUSION_2023"
+    title: "BEVFusion: Multi-Task Multi-Sensor Fusion with Unified Bird's-Eye View Representation"
+    year: 2023
+    venue: "ICRA"
+    status: "CORE"
+    used_by: ["world_model"]
+
+  - reference_id: "RCBEVDET_2024"
+    title: "RCBEVDet: Radar-Camera Fusion in Bird's Eye View for 3D Object Detection"
+    year: 2024
+    venue: "CVPR"
+    status: "CORE"
+    used_by: ["world_model"]
+
+  - reference_id: "FAST_LIO2_2022"
+    title: "FAST-LIO2: Fast Direct LiDAR-Inertial Odometry"
+    year: 2022
+    venue: "IEEE Transactions on Robotics"
+    status: "CORE"
+    used_by: ["localization"]
+
+  - reference_id: "FAST_LIVO2_2024"
+    title: "FAST-LIVO2: Fast, Direct LiDAR-Inertial-Visual Odometry"
+    year: 2024
+    venue: "arXiv"
+    status: "SUPPORTING"
+    used_by: ["localization"]
+
+  - reference_id: "RISAM_2022"
+    title: "Robust Incremental Smoothing and Mapping"
+    year: 2022
+    venue: "arXiv"
+    status: "SUPPORTING"
+    used_by: ["localization"]
+
+  - reference_id: "PLUTO_2024"
+    title: "PLUTO: Pushing the Limit of Imitation Learning-based Planning for Autonomous Driving"
+    year: 2024
+    venue: "arXiv"
+    status: "SUPPORTING"
+    used_by: ["trajectory_planner"]
+
+  - reference_id: "APOLLO_EM_2018"
+    title: "Baidu Apollo EM Motion Planner"
+    year: 2018
+    venue: "arXiv"
+    status: "CORE"
+    used_by: ["trajectory_planner"]
+
+  - reference_id: "BOT_DRIVE_2024"
+    title: "BoT-Drive: Hierarchical Behavior and Trajectory Planning using POMDPs"
+    year: 2024
+    venue: "arXiv"
+    status: "SUPPORTING"
+    used_by: ["behavior_planner"]
+
+  - reference_id: "RSS_2017"
+    title: "On a Formal Model of Safe and Scalable Self-driving Cars"
+    year: 2017
+    venue: "arXiv"
+    status: "CORE"
+    used_by: ["safety_cage"]
+
+  - reference_id: "CBF_ISS_2022"
+    title: "Control Barrier Functions and Input-to-State Safety with Application to Automated Vehicles"
+    year: 2022
+    venue: "arXiv"
+    status: "CORE"
+    used_by: ["safety_cage"]
+
+  - reference_id: "SIMPLEX_DRIVE_2021"
+    title: "Runtime Safety Assurance for Learning-enabled Control of Autonomous Driving Vehicles"
+    year: 2021
+    venue: "arXiv"
+    status: "CORE"
+    used_by: ["safety_cage"]
+
+  - reference_id: "SAE_J3016_202104"
+    title: "Taxonomy and Definitions for Terms Related to Driving Automation Systems"
+    year: 2021
+    venue: "SAE Standard"
+    status: "STANDARD_VALIDATION"
+    used_by: ["behavior_planner", "application"]
+
+  - reference_id: "CARLA_SYNCHRONY_DOCUMENTATION"
+    title: "CARLA Synchrony and Time-step Documentation"
+    year: 2026
+    venue: "Official documentation"
+    status: "CORE"
+    used_by: ["carla_adapter", "time_synchronizer"]
+
+  - reference_id: "RTI_NMPC_ACADOS"
+    title: "SQP-RTI and acados real-time optimal control literature"
+    year: 2026
+    venue: "Primary documentation and publications"
+    status: "CORE"
+    used_by: ["controller"]
+
+  - reference_id: "RTI_NMPC_ACADOS"
+    title: "acados and SQP-RTI real-time optimal control documentation and publications"
+    year: 2026
+    venue: "Official project documentation / primary publications"
+    status: "CORE"
+    used_by: ["controller"]
+    url: "https://docs.acados.org/"

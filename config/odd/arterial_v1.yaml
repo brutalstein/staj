@@ -1,0 +1,8 @@
+schema_version: "1.0"
+odd_id: "arterial_v1"
+road_types: ["multi_lane_urban", "divided_arterial", "highway_entry_exit"]
+maximum_speed_kph: 80
+minimum_visibility_m: 150
+weather: ["clear", "cloudy", "light_rain"]
+requires_map: true
+requires_degraded_mode: true

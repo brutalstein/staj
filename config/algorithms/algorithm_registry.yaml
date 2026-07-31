@@ -1,0 +1,81 @@
+schema_version: "1.0"
+algorithms:
+  - algorithm_id: "ALG-SIM-001"
+    name: "Deterministik CARLA orkestrasyonu"
+    module_id: "carla_adapter"
+    status: "baseline"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["RuntimeConfiguration"]
+    outputs: ["CarlaServerInfo"]
+    fallback: "controlled_shutdown"
+    references: ["CARLA_SYNCHRONY_DOCUMENTATION"]
+
+  - algorithm_id: "ALG-SYNC-001"
+    name: "Bounded multi-rate sensor synchronization"
+    module_id: "time_synchronizer"
+    status: "planned_phase_1"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["RawSensorPacket"]
+    outputs: ["SynchronizedSensorFrame"]
+    fallback: "missing_modality_mask"
+    references: ["CARLA_SYNCHRONY_DOCUMENTATION"]
+
+  - algorithm_id: "ALG-LOC-001"
+    name: "FAST-LIO2 baseline ve FAST-LIVO2 hedef odometri"
+    module_id: "localization"
+    status: "planned_phase_2"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["SynchronizedSensorFrame"]
+    outputs: ["LocalizationEstimate"]
+    fallback: "imu_wheel_dead_reckoning"
+    references: ["FAST_LIO2_2022", "FAST_LIVO2_2024", "RISAM_2022"]
+
+  - algorithm_id: "ALG-FUS-001"
+    name: "Availability-aware multi-sensor BEV fusion"
+    module_id: "world_model"
+    status: "planned_phase_3"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["SynchronizedSensorFrame", "LocalizationEstimate"]
+    outputs: ["WorldModelSnapshot"]
+    fallback: "masked_available_modalities"
+    references: ["UNIAD_2023", "BEVFUSION_2023", "RCBEVDET_2024"]
+
+  - algorithm_id: "ALG-BEH-001"
+    name: "Hiyerarşik davranış planlama"
+    module_id: "behavior_planner"
+    status: "planned_phase_4"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["WorldModelSnapshot", "LocalizationEstimate"]
+    outputs: ["BehaviorIntent", "SpeedConstraintSet"]
+    fallback: "priority_safe_rules"
+    references: ["BOT_DRIVE_2024", "SAE_J3016_202104"]
+
+  - algorithm_id: "ALG-PLAN-001"
+    name: "Planning query ve kısıtlı trajectory refinement"
+    module_id: "trajectory_planner"
+    status: "planned_phase_4"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["BehaviorIntent", "WorldModelSnapshot"]
+    outputs: ["TrajectoryCandidateSet"]
+    fallback: "frenet_quintic_safe_corridor"
+    references: ["UNIAD_2023", "PLUTO_2024", "APOLLO_EM_2018"]
+
+  - algorithm_id: "ALG-SAFE-001"
+    name: "RSS, HOCBF-QP ve Simplex Safety Cage"
+    module_id: "safety_cage"
+    status: "planned_phase_5"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["TrajectoryCandidateSet", "LocalizationEstimate", "SynchronizedSensorFrame"]
+    outputs: ["SafeTrajectory", "SafetyDecision"]
+    fallback: "minimal_risk_manoeuvre"
+    references: ["RSS_2017", "CBF_ISS_2022", "SIMPLEX_DRIVE_2021"]
+
+  - algorithm_id: "ALG-CTRL-001"
+    name: "RTI-NMPC trajectory control"
+    module_id: "controller"
+    status: "planned_phase_5"
+    odd_profiles: ["urban_nominal_v1", "urban_adverse_v1", "arterial_v1"]
+    inputs: ["SafeTrajectory", "LocalizationEstimate"]
+    outputs: ["VehicleCommand"]
+    fallback: "pure_pursuit_and_gain_scheduled_pid"
+    references: ["RTI_NMPC_ACADOS"]

@@ -1,0 +1,23 @@
+:root {
+  --portal-card-radius: 18px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 2rem;
+}
+
+.hero-card {
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: var(--portal-card-radius);
+  padding: 1.2rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
+}
+
+.mermaid {
+  border-radius: var(--portal-card-radius);
+  padding: 1rem;
+}

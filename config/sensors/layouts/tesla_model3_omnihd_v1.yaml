@@ -1,0 +1,68 @@
+schema_version: "1.0"
+layout_id: "tesla_model3_omnihd_v1"
+reference_frame: "ego_rear_axle"
+vehicle_blueprint: "vehicle.tesla.model3"
+
+sensors:
+  - sensor_id: "lidar_roof"
+    type: "lidar_64_channel"
+    normalized_position:
+      wheelbase_ratio_x: 0.45
+      vehicle_width_ratio_y: 0.0
+      vehicle_height_ratio_z: 1.0
+      additional_height_m: 0.10
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+
+  - sensor_id: "camera_front"
+    type: "rgb_camera"
+    orientation_deg: {roll: 0.0, pitch: -2.0, yaw: 0.0}
+    horizontal_fov_deg: 80.0
+
+  - sensor_id: "camera_front_left"
+    type: "rgb_camera"
+    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: 60.0}
+    horizontal_fov_deg: 110.0
+
+  - sensor_id: "camera_front_right"
+    type: "rgb_camera"
+    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: -60.0}
+    horizontal_fov_deg: 110.0
+
+  - sensor_id: "camera_rear_left"
+    type: "rgb_camera"
+    orientation_deg: {roll: 0.0, pitch: -5.0, yaw: 120.0}
+    horizontal_fov_deg: 110.0
+
+  - sensor_id: "camera_rear_right"
+    type: "rgb_camera"
+    orientation_deg: {roll: 0.0, pitch: -5.0, yaw: -120.0}
+    horizontal_fov_deg: 110.0
+
+  - sensor_id: "camera_rear"
+    type: "rgb_camera"
+    orientation_deg: {roll: 0.0, pitch: -4.0, yaw: 180.0}
+    horizontal_fov_deg: 115.0
+
+  - sensor_id: "radar_front"
+    type: "4d_radar_proxy"
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 0.0}
+
+  - sensor_id: "radar_front_left"
+    type: "4d_radar_proxy"
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 55.0}
+
+  - sensor_id: "radar_front_right"
+    type: "4d_radar_proxy"
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: -55.0}
+
+  - sensor_id: "radar_rear_left"
+    type: "4d_radar_proxy"
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 145.0}
+
+  - sensor_id: "radar_rear_right"
+    type: "4d_radar_proxy"
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: -145.0}
+
+  - sensor_id: "radar_rear"
+    type: "4d_radar_proxy"
+    orientation_deg: {roll: 0.0, pitch: 0.0, yaw: 180.0}

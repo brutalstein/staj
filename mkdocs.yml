@@ -1,0 +1,58 @@
+site_name: L4 Autonomy Architecture Portal
+site_description: Yaşayan mimari, sözleşme, algoritma ve sensör yerleşimi portalı
+site_url: http://127.0.0.1:8000
+
+theme:
+  name: material
+  language: tr
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.instant
+    - content.code.copy
+    - content.tabs.link
+    - search.suggest
+  palette:
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Açık temaya geç
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Koyu temaya geç
+
+nav:
+  - Genel Bakış: index.md
+  - Mimari:
+      - Sistem: architecture/system.md
+      - Veri Akışı: architecture/data_flow.md
+      - Faz Durumu: architecture/phase_status.md
+  - Algoritmalar: algorithms/index.md
+  - Sensör Yerleşimi: sensors/layout.md
+  - Kaynaklar: sources/index.md
+  - Geliştirici:
+      - Modül Kayıtları: development/module_records.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - assets/javascripts/architecture_explorer.js
+
+extra_css:
+  - assets/stylesheets/portal.css

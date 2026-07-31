@@ -1,0 +1,247 @@
+---
+module_id: "replace_with_module_id"
+module_name: "Modülün görünen adı"
+owner: "team-or-role"
+status: "planned"
+schema_version: "1.0"
+last_reviewed: "YYYY-MM-DD"
+---
+
+# Modül: Modülün görünen adı
+
+> Bu dosya modülün yaşayan teknik kaydıdır. Kod, sözleşme veya entegrasyon değiştiğinde aynı değişiklik içinde güncellenir.
+
+## 1. Amaç
+
+Modülün tek ana sorumluluğunu kısa ve ölçülebilir biçimde açıklayın.
+
+## 2. Kapsam dışı
+
+Bu modülün özellikle yapmaması gereken işleri yazın. Komşu modüllerle sorumluluk çakışmasını önler.
+
+## 3. Sistem içindeki yeri
+
+```text
+Upstream Module
+    ↓ InputContract
+This Module
+    ↓ OutputContract
+Downstream Module
+```
+
+## 4. Gelen inputlar
+
+<!-- AUTO:INPUTS:START -->
+
+| Input | Üreten modül | Frekans | Maksimum yaş | Birim/frame | Zorunlu mu? |
+|---|---|---:|---:|---|---|
+| `ExampleInput` | `upstream_module` | 10 Hz | 100 ms | metre / ego | Evet |
+
+<!-- AUTO:INPUTS:END -->
+
+### Input kabul kuralları
+
+- Geçersiz input nasıl anlaşılır?
+- Eksik inputta beklenir mi, son değer mi kullanılır, yoksa modül degraded moda mı geçer?
+- Zaman aşımı nedir?
+- Confidence veya kovaryans sınırı nedir?
+- Frame/birim dönüşümü nerede yapılır?
+
+
+## 5. Algoritmalar
+
+<!-- AUTO:ALGORITHMS:START -->
+
+| Algoritma | Durum | Görev | ODD | Fallback |
+|---|---|---|---|---|
+| `ALG-EXAMPLE-001` | target | Örnek görev | urban | Güvenli fallback |
+
+<!-- AUTO:ALGORITHMS:END -->
+
+Her algoritma için aşağıdakiler açıklanır:
+
+- Neden seçildi?
+- Hangi inputları kullanıyor?
+- Matematiksel veya mantıksal işlem nedir?
+- Hangi outputları üretiyor?
+- Outputları hangi bileşenler kullanıyor?
+- Hangi ODD profillerinde aktiftir?
+- Ayarlanabilir parametreleri nelerdir?
+- Hesaplama bütçesi nedir?
+- Bilinen hata biçimleri nelerdir?
+- Fallback nedir?
+- Hangi yayınlara dayanır?
+- Hangi testlerle doğrulanır?
+
+Algoritmanın ayrıntılı ve makine tarafından doğrulanan kaydı
+`config/algorithms/algorithm_registry.yaml` dosyasındadır.
+
+## 5. Modülün yaptığı işlem
+
+İşlem sırasını, verinin nasıl dönüştürüldüğünü ve önemli matematiksel/algoritmik kararları açıklayın.
+
+```text
+Validate
+→ Normalize
+→ Core Algorithm
+→ Confidence/Uncertainty
+→ Output Validation
+```
+
+### 5.1 Temel algoritma
+
+Algoritmanın neden seçildiğini, alternatiflerini ve sınırlamalarını yazın.
+
+### 5.2 Durum ve bellek
+
+- Modül stateful mı?
+- Hangi geçmişi tutar?
+- Reset koşulu nedir?
+- Replay sırasında deterministik midir?
+
+### 5.3 Ayarlanabilir parametreler
+
+<!-- AUTO:PARAMETERS:START -->
+
+| Parametre | Varsayılan | Birim | Aralık | Kritik | Açıklama |
+|---|---:|---|---|---|---|
+| `example_weight` | 1.0 | boyutsuz | 0–10 | Hayır | Örnek |
+
+<!-- AUTO:PARAMETERS:END -->
+
+Parametrelerin hangi davranışı etkilediğini ve yanlış ayarın beklenen semptomlarını yazın.
+
+## 6. Üretilen outputlar
+
+<!-- AUTO:OUTPUTS:START -->
+
+| Output | Tip | Frekans | Frame/birim | Geçerlilik koşulu |
+|---|---|---:|---|---|
+| `ExampleOutput` | `ExampleOutput` | 10 Hz | ego / SI | Inputlar geçerliyse |
+
+<!-- AUTO:OUTPUTS:END -->
+
+### Output anlamı
+
+Her outputun semantik anlamını, confidence ve belirsizlik bilgisini açıklayın.
+
+## 7. Output tüketicileri
+
+<!-- AUTO:CONSUMERS:START -->
+
+| Output | Tüketen modül | Nasıl kullanıyor? | Tüketici fallback'i |
+|---|---|---|---|
+| `ExampleOutput` | `downstream_module` | Karar girdisi | Son güvenli değeri kullanır |
+
+<!-- AUTO:CONSUMERS:END -->
+
+Bu bölüm “çıktıyı nereye entegre ettik?” sorusunun kesin cevabıdır.
+
+## 8. Yaşam döngüsü
+
+- Başlatma ön koşulları
+- `READY` kriteri
+- Normal çalışma
+- `DEGRADED` koşulları
+- `FAILED` koşulları
+- Kontrollü kapanış
+- Yeniden başlatılabilirlik
+
+## 9. Hata ve fallback davranışı
+
+| Hata | Tespit | Modül davranışı | Sisteme bildirilen durum |
+|---|---|---|---|
+| Input timeout | Veri yaşı | Output üretme/degraded | `RuntimeHealth` |
+| İç istisna | Exception boundary | Güvenli kapanış | `FAILED` |
+
+Sessiz hata yutma kullanılmaz.
+
+## 10. Bağımlılıklar
+
+### İç bağımlılıklar
+
+Yalnızca gerçekten kullanılan proje paketlerini yazın.
+
+### Harici bağımlılıklar
+
+| Paket | Sürüm aralığı | Kullanım nedeni | Değiştirme maliyeti |
+|---|---|---|---|
+
+Aynı işi yapan mevcut yardımcı yapı varken yeni yardımcı kod eklenmez.
+
+## 11. Loglama, metrik ve izlenebilirlik
+
+### Log olayları
+
+- Başlatma
+- Degraded moda geçiş
+- Timeout
+- Output reddi
+- Kritik parametre değişimi
+
+### Metrikler
+
+| Metrik | Birim | Hedef | Alarm |
+|---|---|---:|---:|
+| `processing_latency_ms` | ms | ... | ... |
+
+### Lineage
+
+Outputun hangi input sequence numaralarından, model/config sürümünden üretildiği kaydedilir.
+
+## 12. Testler
+
+<!-- AUTO:TESTS:START -->
+
+| Test | Seviye | Doğruladığı gereksinim |
+|---|---|---|
+| `test_example` | unit | Temel hesap |
+
+<!-- AUTO:TESTS:END -->
+
+Zorunlu test sınıfları:
+
+- Unit
+- Contract
+- Integration
+- Replay
+- Scenario veya fault injection
+- Performans, gerekiyorsa
+
+## 13. Bilinen sınırlamalar
+
+Gerçekçi ve açık yazın. Henüz desteklenmeyen koşulları saklamayın.
+
+## 14. Akademik ve mühendislik kaynakları
+
+| Kaynak | Bu modülde kullanılan karar | Birebir mi, uyarlanmış mı? |
+|---|---|---|
+
+## 15. Entegrasyon geçmişi
+
+| Tarih | Değişiklik | Entegre edilen yer | Gerekçe | PR/commit/ADR |
+|---|---|---|---|---|
+| YYYY-MM-DD | İlk entegrasyon | ... | ... | ... |
+
+Bu tablo her küçük kod değişikliğinin kopyası değildir. Modülün veri akışını, sorumluluğunu veya entegrasyonunu değiştiren olayları kaydeder.
+
+## 16. İlgili mimari kararlar
+
+- `ADR-XXXX`
+- `ADR-YYYY`
+
+## 17. Değişiklik kontrol listesi
+
+Bir değişiklik tamamlanmadan önce:
+
+- [ ] Mevcut aynı işlev araştırıldı; gereksiz ikinci implementasyon eklenmedi.
+- [ ] Input sözleşmeleri güncel.
+- [ ] Output sözleşmeleri güncel.
+- [ ] Üretici ve tüketiciler güncel.
+- [ ] Birimler ve koordinat frame'leri açık.
+- [ ] Parametre kataloğu güncel.
+- [ ] Hata/fallback davranışı güncel.
+- [ ] Lineage ve metrikler güncel.
+- [ ] Testler güncel ve başarılı.
+- [ ] Generated bölümler yeniden üretildi.
+- [ ] Doküman portalı doğrulaması başarılı.

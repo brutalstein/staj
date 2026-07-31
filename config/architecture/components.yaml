@@ -1,0 +1,72 @@
+schema_version: "1.0"
+
+components:
+  - module_id: "configuration"
+    status: "implemented"
+    input_producers: ["external"]
+    output_consumers: ["application", "carla_adapter"]
+
+  - module_id: "contracts"
+    status: "implemented"
+    input_producers: []
+    output_consumers: ["application", "runtime", "carla_adapter"]
+
+  - module_id: "runtime"
+    status: "implemented"
+    input_producers: ["application"]
+    output_consumers: ["application"]
+
+  - module_id: "carla_adapter"
+    status: "implemented"
+    input_producers: ["configuration", "external"]
+    output_consumers: ["application"]
+
+  - module_id: "application"
+    status: "implemented"
+    input_producers: ["configuration", "carla_adapter", "runtime"]
+    output_consumers: ["external"]
+
+  - module_id: "sensor_gateway"
+    status: "planned_phase_1"
+    input_producers: ["carla_adapter"]
+    output_consumers: ["time_synchronizer", "recorder"]
+
+  - module_id: "time_synchronizer"
+    status: "planned_phase_1"
+    input_producers: ["sensor_gateway"]
+    output_consumers: ["localization", "world_model", "safety_cage"]
+
+  - module_id: "recorder"
+    status: "planned_phase_1"
+    input_producers: ["sensor_gateway", "time_synchronizer", "application"]
+    output_consumers: ["external"]
+
+  - module_id: "localization"
+    status: "planned_phase_2"
+    input_producers: ["time_synchronizer"]
+    output_consumers: ["world_model", "behavior_planner", "trajectory_planner", "safety_cage", "controller"]
+
+  - module_id: "world_model"
+    status: "planned_phase_3"
+    input_producers: ["time_synchronizer", "localization"]
+    output_consumers: ["behavior_planner", "trajectory_planner", "safety_cage"]
+
+  - module_id: "behavior_planner"
+    status: "planned_phase_4"
+    input_producers: ["world_model", "localization"]
+    output_consumers: ["trajectory_planner", "safety_cage"]
+
+  - module_id: "trajectory_planner"
+    status: "planned_phase_4"
+    input_producers: ["world_model", "behavior_planner", "localization"]
+    output_consumers: ["safety_cage"]
+
+  - module_id: "safety_cage"
+    status: "planned_phase_5"
+    input_producers: ["time_synchronizer", "localization", "world_model", "behavior_planner", "trajectory_planner"]
+    output_consumers: ["controller"]
+
+  - module_id: "controller"
+    status: "planned_phase_5"
+    input_producers: ["localization", "safety_cage"]
+    output_consumers: ["carla_adapter"]

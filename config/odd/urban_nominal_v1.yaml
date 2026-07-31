@@ -1,0 +1,8 @@
+schema_version: "1.0"
+odd_id: "urban_nominal_v1"
+road_types: ["urban", "residential", "intersection"]
+maximum_speed_kph: 50
+minimum_visibility_m: 100
+weather: ["clear", "cloudy", "light_rain", "wet_road"]
+requires_map: true
+requires_degraded_mode: false
