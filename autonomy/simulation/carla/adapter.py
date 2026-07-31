@@ -17,6 +17,7 @@ class CarlaConnectionError(RuntimeError):
 class CarlaServerInfo:
     client_version: str
     server_version: str
+    compatibility_version: str
     map_name: str
     capabilities: CarlaCapabilities
 
@@ -63,22 +64,28 @@ class CarlaAdapter:
                 "sunucusunu açın."
             ) from exc
 
-        if client_version != server_version:
+        client_compatibility_version = self._configuration.resolve_version(client_version)
+        server_compatibility_version = self._configuration.resolve_version(server_version)
+
+        if client_compatibility_version != server_compatibility_version:
             raise CarlaConnectionError(
                 "CARLA Python API ve server sürümleri eşleşmiyor. "
-                f"Python API={client_version}, server={server_version}."
+                f"Python API={client_version} ({client_compatibility_version}), "
+                f"server={server_version} ({server_compatibility_version})."
             )
-        if server_version not in self._configuration.supported_versions:
+        if server_compatibility_version not in self._configuration.supported_versions:
             raise CarlaConnectionError(
-                f"Desteklenmeyen CARLA sürümü: {server_version}. "
+                f"Desteklenmeyen CARLA sürümü: {server_version} "
+                f"(uyumluluk={server_compatibility_version}). "
                 f"Desteklenenler: {', '.join(self._configuration.supported_versions)}"
             )
 
         self._server_info = CarlaServerInfo(
             client_version=client_version,
             server_version=server_version,
+            compatibility_version=server_compatibility_version,
             map_name=map_name,
-            capabilities=capabilities_for(server_version),
+            capabilities=capabilities_for(server_compatibility_version),
         )
         return self._server_info
 

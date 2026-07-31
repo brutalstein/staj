@@ -19,7 +19,7 @@ Sürümlü YAML konfigürasyonunu tek noktadan yükler, sınırlarını doğrula
 
 ## İşlem
 
-YAML parse edilir, zorunlu alanlar ve frekans/fixed-delta tutarlılığı doğrulanır, SHA-256 hash hesaplanır.
+YAML parse edilir; zorunlu alanlar, frekans/fixed-delta tutarlılığı ve özel CARLA build kimliklerinin desteklenen semantik sürümlere yönlenmesi doğrulanır. Son olarak SHA-256 hash hesaplanır.
 
 ## Output
 

@@ -25,8 +25,9 @@ CARLA Python API tiplerini otonomi çekirdeğinden izole eder; server bağlantı
 
 1. `carla` modülünü lazy import eder.
 2. RPC bağlantısı kurar.
-3. Client/server sürüm eşleşmesini doğrular.
-4. Harita adını ve sürüm capability bilgisini üretir.
+3. Client/server tarafından raporlanan semantik sürüm veya build kimliğini konfigüre edilmiş alias tablosuyla çözümler.
+4. Çözümlenen uyumluluk sürümlerinin eşleştiğini ve desteklendiğini doğrular.
+5. Ham sürümleri, uyumluluk sürümünü, harita adını ve capability bilgisini üretir.
 
 ## Output
 

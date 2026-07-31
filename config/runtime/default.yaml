@@ -1,0 +1,17 @@
+schema_version: "1.0"
+
+carla:
+  host: "127.0.0.1"
+  rpc_port: 2000
+  timeout_seconds: 3.0
+  supported_versions:
+    - "0.9.15"
+    - "0.9.16"
+  server_version_aliases:
+    "e78db150c": "0.9.16"
+
+runtime:
+  simulation_frequency_hz: 50
+  fixed_delta_seconds: 0.02
+  control_frequency_hz: 50
+  log_level: "INFO"
